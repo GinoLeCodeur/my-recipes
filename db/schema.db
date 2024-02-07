@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    role VARCHAR(50) DEFAULT 'user' NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS recipes (
+    recipe_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS ingredients (
+    ingredient_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS recipes_ingredients (
+    recipe_id INTEGER REFERENCES recipes(recipe_id),
+    ingredient_id INTEGER REFERENCES ingredients(ingredient_id),
+    quantity NUMERIC NOT NULL,
+    unit VARCHAR(255) NOT NULL,
+    CONSTRAINT id PRIMARY KEY (recipe_id, ingredient_id)
+);
+
+CREATE TABLE IF NOT EXISTS recipe_steps (
+    recipe_step_id SERIAL PRIMARY KEY,
+    recipe_id INTEGER REFERENCES recipes(recipe_id),
+    description TEXT,
+    step_order INTEGER
+);
