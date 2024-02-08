@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import MaterialSymbol from "./MaterialSymbol";
 
@@ -8,8 +9,9 @@ export default function Header() {
                 <div className="flex items-center">
                     <Link
                         href="/"
-                        className={`text-lg font-bold text-[var(--primary-color)]`}
+                        className={`flex text-lg font-bold text-[var(--primary-color)]`}
                     >
+                        <Image src="icon.svg" alt="My recipes" width="24" height="24" className="mr-2" />
                         My recipes
                     </Link>
                     <nav className="flex flex-1 justify-end">
