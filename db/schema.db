@@ -1,3 +1,5 @@
+-- DROP TABLE IF EXISTS users, recipes, ingredients, recipes_ingredients, recipe_steps;
+
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
