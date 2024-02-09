@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS recipes (
 CREATE TABLE IF NOT EXISTS ingredients (
     ingredient_id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
+    unit VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(user_id)
 );
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS recipes_ingredients (
     recipe_id INTEGER REFERENCES recipes(recipe_id),
     ingredient_id INTEGER REFERENCES ingredients(ingredient_id),
     quantity NUMERIC NOT NULL,
-    unit VARCHAR(255) NOT NULL,
+    ingredient_order INTEGER,
     CONSTRAINT id PRIMARY KEY (recipe_id, ingredient_id)
 );
 
