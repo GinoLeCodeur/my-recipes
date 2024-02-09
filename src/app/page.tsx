@@ -5,7 +5,13 @@ import { sql } from "@vercel/postgres";
 
 export default async function Home() {
     const recipesData = await sql`
-        SELECT recipe_id AS "recipeId", name, image FROM recipes
+        SELECT 
+            recipe_id as "recipeId",
+            slug, 
+            name, 
+            image 
+        FROM 
+            recipes
     `;
     
     return (
@@ -17,7 +23,7 @@ export default async function Home() {
                             <li key={recipe.recipeId}>
                                 <article>
                                     <Link
-                                        href={`/recipe/${recipe.recipeId}`}
+                                        href={`/recipe/${recipe.slug}`}
                                         className="flex flex-col bg-[#fff]"
                                     >
                                         <picture>
@@ -27,7 +33,7 @@ export default async function Home() {
                                                 width="600"
                                                 height="400"
                                                 unoptimized
-                                                className="w-full"
+                                                className="w-full aspect-video object-cover"
                                             />
                                         </picture>
                                         <h2 className="p-4 font-bold">
