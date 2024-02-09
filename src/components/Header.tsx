@@ -11,7 +11,7 @@ export default function Header() {
                         href="/"
                         className={`flex text-lg font-bold text-[var(--primary-color)]`}
                     >
-                        <Image src="icon.svg" alt="My recipes" width="24" height="24" className="mr-2" />
+                        <Image src="/icon.svg" alt="My recipes" width="24" height="24" className="mr-2" />
                         My recipes
                     </Link>
                     <nav className="flex flex-1 justify-end">
