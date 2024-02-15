@@ -9,9 +9,9 @@ export default function Header() {
                 <div className="flex items-center">
                     <Link
                         href="/"
-                        className={`flex text-lg font-bold text-[var(--primary-color)]`}
+                        className={`flex items-center text-lg font-bold text-[var(--primary-color)]`}
                     >
-                        <Image src="/icon.svg" alt="My recipes" width="24" height="24" className="mr-2" />
+                        <Image src="/icon.svg" alt="My recipes" width={0} height={0} className="mr-2 w-auto h-[24px]" />
                         My recipes
                     </Link>
                     <nav className="flex flex-1 justify-end">
