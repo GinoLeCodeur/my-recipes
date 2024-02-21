@@ -1,18 +1,14 @@
 import Link from "next/link";
-import MaterialSymbol from "./MaterialSymbol";
 
 export default function Footer() {
     return (
-        <footer className="flex justify-center w-full py-4 border-t border-[#ece6e0]">
+        <footer className="flex justify-center w-full p-4 border-t border-[#ece6e0]">
             <div className="flex justify-center w-full max-w-screen-xl text-sm">
-                Made with{" "}
-                <MaterialSymbol
-                    name="favorite"
-                    fill
-                    className="mx-1 fill-[#f00]"
-                    opticalSize={20}
-                />{" "}
-                by{" "}
+                Made with{' '}
+                <span className="material-symbols-outlined block mx-1 text-[#f00] ms-fill">
+                    favorite
+                </span>{' '}
+                by{' '}
                 <Link
                     href="https://www.lecodeur.nl/"
                     target="_blank"

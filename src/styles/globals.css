@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,4 +10,14 @@
     --tertiairy-color: #bed1cf;
 
     --background-color: #fff7f1;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+}
+
+@layer utilities {
+    .ms-fill {
+        font-variation-settings: 'FILL' 1, 'wght' 200, 'GRAD' 0, 'opsz' 24 !important;
+    }
 }
