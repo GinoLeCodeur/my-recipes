@@ -1,34 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
-import MaterialSymbol from "./MaterialSymbol";
+import UserMenu from "./UserMenu";
 
 export default function Header() {
     return (
         <header className="flex flex-col items-center w-full border-b border-[#ece6e0]">
-            <div className="w-full max-w-screen-xl">
+            <div className="w-full max-w-screen-xl px-4">
                 <div className="flex items-center">
                     <Link
                         href="/"
                         className={`flex items-center text-lg font-bold text-[var(--primary-color)]`}
                     >
-                        <Image src="/icon.svg" alt="My recipes" width={0} height={0} className="mr-2 w-auto h-[24px]" />
+                        <Image
+                            src="/icon.svg"
+                            alt="My recipes"
+                            width={0}
+                            height={0}
+                            className="mr-2 w-auto h-[24px]"
+                        />
                         My recipes
                     </Link>
                     <nav className="flex flex-1 justify-end">
-                        <ul className="flex gap-4">
-                            <li className="py-4">
-                                <MaterialSymbol
-                                    name="search"
-                                    weight={200}
-                                    className="cursor-pointer"
-                                />
+                        <ul className="flex items-center gap-4">
+                            <li>
+                                <button className="py-4">
+                                    <span className="block material-symbols-outlined">
+                                        search
+                                    </span>
+                                </button>
                             </li>
-                            <li className="py-4">
-                                <MaterialSymbol
-                                    name="account_circle"
-                                    weight={200}
-                                    className="cursor-pointer"
-                                />
+                            <li>
+                                <UserMenu />
                             </li>
                         </ul>
                     </nav>
