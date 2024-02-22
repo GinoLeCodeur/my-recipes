@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255),
     role VARCHAR(50) DEFAULT 'user' NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    blocked TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS recipes (
@@ -16,7 +17,8 @@ CREATE TABLE IF NOT EXISTS recipes (
     description TEXT,
     image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INTEGER REFERENCES users(user_id)
+    created_by INTEGER REFERENCES users(user_id),
+    inactive TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS ingredients (
