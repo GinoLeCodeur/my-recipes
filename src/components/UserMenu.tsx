@@ -6,15 +6,15 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function UserMenu() {
     const { data: session } = useSession();
+    const wrapperRef = useRef<HTMLDivElement>(null);
 
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
-	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent): void {
-			if (ref.current && !ref.current.contains(event.target as Node)) {
-				setIsExpanded(false);
-			}
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setIsExpanded(false);
+            }
 		}
 		document.addEventListener('mousedown', handleClickOutside);
 
@@ -24,7 +24,7 @@ export default function UserMenu() {
 	});
 
     return (
-        <div ref={ref} className="relative py-4">
+        <div className="relative py-4" ref={wrapperRef}>
             <button
                 type="button"
                 className="block"
@@ -41,23 +41,37 @@ export default function UserMenu() {
                 } absolute right-0 top-[calc(100%+1px)] bg-white whitespace-nowrap`}
             >
                 {session?.user ? (
-                    <li>
-                        <button
-                            onClick={() => signOut()}
-                            className="flex items-center px-4 py-2"
-                        >
-                            <span className="block material-symbols-outlined mr-2">
-                                logout
-                            </span>
-                            Uitloggen
-                        </button>
-                    </li>
+                    <>
+                        <li className="border-b border-[#ece6e0]">
+                            <Link
+                                href="/recipe/manage"
+                                className="flex items-center px-4 py-2"
+                                onClick={() => setIsExpanded(false)}
+                            >
+                                <span className="block material-symbols-outlined mr-2">
+                                    settings_applications
+                                </span>
+                                Recepten beheren
+                            </Link>
+                        </li>
+                        <li className="border-b border-[#ece6e0]">
+                            <button
+                                onClick={() => signOut()}
+                                className="flex items-center px-4 py-2"
+                            >
+                                <span className="block material-symbols-outlined mr-2">
+                                    logout
+                                </span>
+                                Uitloggen
+                            </button>
+                        </li>
+                    </>
                 ) : (
-                    <li>
+                    <li className="border-b border-[#ece6e0]">
                         <Link
                             href="/login"
                             className="flex items-center px-4 py-2"
-							onClick={() => setIsExpanded(false)}
+                            onClick={() => setIsExpanded(false)}
                         >
                             <span className="block material-symbols-outlined mr-2">
                                 login
