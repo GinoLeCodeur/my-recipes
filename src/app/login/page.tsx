@@ -1,12 +1,13 @@
 'use client';
 
 import { User } from '@/types';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { ChangeEvent, FormEvent, useState } from 'react';
 
 export default function Home() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [loginData, setLoginData] = useState<User>({
         email: '',
@@ -24,21 +25,32 @@ export default function Home() {
 
     const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const callbackUrl = searchParams.get('callbackUrl');
 
         setLoading(true);
         setError('');
 
-        const loginResponse = await signIn('credentials', {
-            email: loginData.email,
-            password: loginData.password,
-            redirect: false
-        });
+        try {
+            const loginResponse = await signIn('credentials', {
+                email: loginData.email,
+                password: loginData.password,
+                redirect: false,
+            });
         
-        if (loginResponse?.status === 200) {
-            router.push('/');
-            router.refresh();
-        } else {
-            setError('Het e-mailadres of wachtwoord is onjuist.');
+            switch(loginResponse?.status) {
+                case 200:
+                    router.push(callbackUrl?.length ? callbackUrl : '/');
+                    router.refresh();
+                    break;
+                case 401:
+                    setError('Het e-mailadres of wachtwoord is onjuist.');
+                    break;
+                default:
+                    setError('Er gaat iets verkeerd.');
+            }
+        } catch(error) {
+            console.log('Error:', error);
+            setError('Er gaat iets verkeerd.');
         }
 
         setLoading(false);
