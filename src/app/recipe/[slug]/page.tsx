@@ -1,23 +1,15 @@
-import Image from "next/image";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { sql } from "@vercel/postgres";
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { sql } from '@vercel/postgres';
+import { getRecipe } from '../actions';
 
 export default async function Page({
     params: { slug },
 }: {
     params: { slug: string };
 }) {
-    const { rows: recipesData } = await sql`
-        SELECT 
-            recipe_id AS "recipeId", 
-            name, 
-            slug, 
-            description, 
-            image
-        FROM recipes
-        WHERE slug = ${slug}
-    `;
+    const { rows: recipesData } = await getRecipe(slug);
 
     if (!recipesData.length) {
         notFound();
@@ -31,9 +23,9 @@ export default async function Page({
             unit,
             ingredient_order AS "ingredientOrder"
         FROM ingredients
-            INNER JOIN recipes_ingredients
-                ON recipes_ingredients.ingredient_id = ingredients.ingredient_id
-        WHERE recipes_ingredients.recipe_id = ${recipesData[0].recipeId}
+            INNER JOIN recipe_ingredients
+                ON recipe_ingredients.ingredient_id = ingredients.ingredient_id
+        WHERE recipe_ingredients.recipe_id = ${recipesData[0].recipeId}
         ORDER BY
             ingredient_order ASC
     `;
@@ -68,15 +60,15 @@ export default async function Page({
                     <h1 className="text-4xl font-medium">
                         {recipesData[0].name}
                     </h1>
-                    {recipesData[0].description.length > 0 &&
-                        <p>{recipesData[0].description}</p>
+                    {recipesData[0].description &&
+                        recipesData[0].description.length > 0 && (
+                            <p>{recipesData[0].description}</p>
+                        )
                     }
                     <h3 className="mt-4 font-bold">Stappen:</h3>
                     {recipeStepsData.length ? (
                         recipeStepsData.map((step) => (
-                            <p key={step.recipeStepId}>
-                                {step.description}
-                            </p>
+                            <p key={step.recipeStepId}>{step.description}</p>
                         ))
                     ) : (
                         <p>Geen stappen gevonden</p>

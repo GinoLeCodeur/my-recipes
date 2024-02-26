@@ -1,17 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { sql } from '@vercel/postgres';
+import { getRecipes } from './recipe/actions';
 
 export default async function Home() {
-    const recipesData = await sql`
-        SELECT 
-            recipe_id as "recipeId",
-            slug, 
-            name, 
-            image 
-        FROM recipes
-    `;
+    const recipesData = await getRecipes();
 
     return (
         <section>

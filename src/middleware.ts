@@ -25,6 +25,6 @@ export default withAuth(
 export const config = {
     matcher: [
         '/login',
-        '/recipe/manage'
+        '/recipe/manage/:path*'
     ],
 };
