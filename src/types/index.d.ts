@@ -13,8 +13,8 @@ export type RecipeStep = {
 };
 
 export type Ingredient = {
-    ingredientId: number;
-    name: string;
+    ingredientId?: number;
+    name?: string;
     quantity?: number;
     unit?: string;
 };

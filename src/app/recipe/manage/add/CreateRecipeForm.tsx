@@ -3,7 +3,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { createRecipe } from '@/app/recipe/actions';
 import { useRouter } from 'next/navigation';
-import { Recipe } from '@/types';
+import { Ingredient, Recipe } from '@/types';
+import { CreateRecipeIngredientsForm } from './CreateRecipeIngredientsForm';
 
 export default function CreateRecipeForm() {
     const router = useRouter();
@@ -11,29 +12,53 @@ export default function CreateRecipeForm() {
     const [recipeData, setRecipeData] = useState<Recipe>({
         name: '',
         slug: '',
-        description: ''
+        description: '',
     });
-    
-    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const [recipeIngredientsData, setRecipeIngredientsData] = useState<
+        Ingredient[]
+    >([]);
+
+    const handleChange = (
+        event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
         const name = event.target.name;
         const value = event.target.value;
 
-        setRecipeData((values) => ({ ...values, [name]: value }));
+        if (name === 'name') {
+            const urlFriendlySlug = value
+                .normalize('NFKD') // split accented characters into their base characters and diacritical marks
+                .replace(/[\u0300-\u036f]/g, '') // remove all the accents, which happen to be all in the \u03xx UNICODE block.
+                .trim() // trim leading or trailing whitespace
+                .toLowerCase() // convert to lowercase
+                .replace(/[^a-z0-9 -]/g, '') // remove non-alphanumeric characters
+                .replace(/\s+/g, '-') // replace spaces with hyphens
+                .replace(/-+/g, '-'); // remove consecutive hyphens
+
+            setRecipeData({
+                ...recipeData,
+                slug: urlFriendlySlug,
+            });
+        }
+
+        setRecipeData((values) => ({
+            ...values, 
+            [name]: value 
+        }));
     };
 
-    const handleSubmit = async (event: FormEvent<EventTarget | HTMLFormElement>) => {
+    const handleSubmit = async (
+        event: FormEvent<EventTarget | HTMLFormElement>
+    ) => {
         event.preventDefault();
 
-        console.log(recipeData);
-
-        await createRecipe({
-            name: recipeData.name,
-            slug: recipeData.slug,
-            description: recipeData.description,
-        });
+        await createRecipe(recipeData, recipeIngredientsData);
 
         router.push('/recipe/manage');
         router.refresh();
+    };
+
+    const handleRecipeIngredients = (recipeIngredientsData: Ingredient[]) => {
+        setRecipeIngredientsData([...recipeIngredientsData]);
     };
 
     return (
@@ -41,35 +66,42 @@ export default function CreateRecipeForm() {
             onSubmit={handleSubmit}
             className="flex flex-col max-w-[600px] mt-4"
         >
-            <label htmlFor="name" className="mb-2">
+            <label htmlFor="name" className="mb-1">
                 Recept naam
             </label>
             <input
                 type="text"
                 name="name"
                 id="name"
-                className="mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
+                className="mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] form-select"
                 onChange={handleChange}
+                autoComplete="off"
             />
-            <label htmlFor="slug" className="mb-2">
+            <label htmlFor="slug" className="mb-1">
                 Slug
             </label>
             <input
                 type="text"
                 name="slug"
                 id="slug"
-                className="mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
+                value={recipeData.slug}
                 onChange={handleChange}
+                className="mb-4 p-2 autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
+                disabled
             />
-            <label htmlFor="description" className="mb-2">
+            <label htmlFor="description" className="mb-1">
                 Omschrijving
             </label>
             <textarea
                 name="description"
                 id="description"
-                className="h-[200px] mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
+                className="h-[200px] mb-6 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 onChange={handleChange}
             ></textarea>
+            <h4 className="mb-2 font-bold">Ingredienten</h4>
+            <CreateRecipeIngredientsForm
+                recipeIngredientsData={handleRecipeIngredients}
+            />
             <div>
                 <button
                     type="submit"
