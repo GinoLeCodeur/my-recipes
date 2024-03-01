@@ -17,7 +17,7 @@ export async function getRecipes() {
 			FROM recipes
 			WHERE inactive >= to_timestamp(${Date.now()} / 1000.0)
 				OR inactive IS NULL
-			ORDER BY recipe_id DESC
+			ORDER BY recipe_id DESC;
 		`;
     } catch (error) {
         console.error('Database error:', error);
@@ -38,7 +38,7 @@ export async function getRecipe(slug: string) {
 			WHERE (
 				inactive >= to_timestamp(${Date.now()} / 1000.0)
 				OR inactive IS NULL
-			) AND slug = ${slug}
+			) AND slug = ${slug};
 		`;
     } catch (error) {
         console.error('Database error:', error);
@@ -58,8 +58,6 @@ export async function createRecipe(
         throw new Error('Not authorized.');
     }
 
-    console.log(recipe);
-
     try {
         const { rows: createRecipe } = await sql`
 			INSERT INTO recipes (
@@ -77,49 +75,11 @@ export async function createRecipe(
 		`;
 
         if (createRecipe.length > 0 && createRecipe[0].recipeId) {
-            const { rows: ingredientsData } = await getIngredients();
+            recipeIngredients?.map(async (ingredient) => {
+				const { rows: createIngredientRes } = await createIngredient(ingredient);
+				ingredient.ingredientId = createIngredientRes[0].ingredientId;
 
-            recipeIngredients?.map(async (recipeIngredient) => {
-                let ingredientCreated: boolean = false;
-
-                if (
-                    !ingredientsData.find(
-                        (ingredient) =>
-                            ingredient.name === recipeIngredient.name
-                    )
-                ) {
-                    console.log(
-                        `Ingredient ${recipeIngredient.name} does not exist in DB.`
-                    );
-
-                    const { rows: createIngredient } = await sql`
-						INSERT INTO ingredients (
-							name,
-							unit,
-							created_by
-						) VALUES (
-							${recipeIngredient.name},
-							${recipeIngredient.unit},
-							${session.user.userId}
-						)
-						RETURNING ingredient_id AS "ingredientId";
-					`;
-
-                    recipeIngredient.ingredientId = createIngredient[0].ingredientId;
-                }
-
-				await sql`
-					INSERT INTO recipe_ingredients (
-						recipe_id,
-						ingredient_id,
-						quantity
-					) VALUES (
-						${createRecipe[0].recipeId},
-						${recipeIngredient.ingredientId},
-						${recipeIngredient.quantity}
-					)
-					RETURNING recipe_id AS "recipeId";
-				`;
+				await createRecipeIngredient(createRecipe[0].recipeId, ingredient);
             });
         }
     } catch (error) {
@@ -140,7 +100,7 @@ export async function deleteRecipe(recipeId: number) {
         await sql`
 			UPDATE recipes
 			SET inactive = to_timestamp(${Date.now()} / 1000.0)
-			WHERE recipe_id = ${recipeId}
+			WHERE recipe_id = ${recipeId};
 		`;
     } catch (error) {
         console.error('Database Error:', error);
@@ -155,10 +115,58 @@ export async function getIngredients() {
 				ingredient_id as "ingredientId",
 				name,
 				unit
-			FROM ingredients
+			FROM ingredients;
 		`;
     } catch (error) {
         console.error('Database error:', error);
-        throw new Error('Failed to fetch recipes.');
+        throw new Error('Failed to fetch ingredients.');
+    }
+}
+
+export async function createIngredient(ingredient: Ingredient) {
+    try {
+        return await sql<Ingredient>`
+			WITH t AS
+			(
+				INSERT INTO ingredients (
+					name,
+					unit
+				) VALUES (
+					${ingredient.name},
+					${ingredient.unit}
+				)
+				ON CONFLICT (name) DO NOTHING
+				RETURNING ingredient_id
+			)
+			SELECT ingredient_id AS "ingredientId"
+			FROM t
+			UNION ALL
+			SELECT ingredient_id AS "ingredientId"
+			FROM ingredients 
+			WHERE name = ${ingredient.name}
+			LIMIT 1;
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to create ingredient.');
+    }
+}
+
+export async function createRecipeIngredient(recipeId: number, ingredient: Ingredient) {
+    try {
+        await sql<Ingredient>`
+			INSERT INTO recipe_ingredients (
+				recipe_id,
+				ingredient_id,
+				quantity
+			) VALUES (
+				${recipeId},
+				${ingredient.ingredientId},
+				${ingredient.quantity}
+			);
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to create recipe ingredient.');
     }
 }
