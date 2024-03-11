@@ -29,12 +29,12 @@ CREATE TABLE IF NOT EXISTS ingredients (
     created_by INTEGER REFERENCES users(user_id)
 );
 
-CREATE TABLE IF NOT EXISTS recipes_ingredients (
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
     recipe_id INTEGER REFERENCES recipes(recipe_id),
     ingredient_id INTEGER REFERENCES ingredients(ingredient_id),
     quantity NUMERIC NOT NULL,
     ingredient_order INTEGER,
-    CONSTRAINT id PRIMARY KEY (recipe_id, ingredient_id)
+    CONSTRAINT pk_recipe_ingredients PRIMARY KEY (recipe_id, ingredient_id)
 );
 
 CREATE TABLE IF NOT EXISTS recipe_steps (

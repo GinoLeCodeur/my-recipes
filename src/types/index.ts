@@ -4,6 +4,7 @@ export type Recipe = {
     slug: string;
     description?: string;
     image?: string;
+    createdBy?: number;
 };
 
 export type RecipeStep = {
