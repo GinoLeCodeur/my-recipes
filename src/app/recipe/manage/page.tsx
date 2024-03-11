@@ -62,7 +62,7 @@ export default async function Page() {
                                         </li>
                                         <li className="mr-4">
                                             <Link
-                                                href={`/recipe/${recipe.slug}`}
+                                                href={`/recipe/manage/edit/${recipe.slug}`}
                                                 className="flex items-center"
                                             >
                                                 <span className="block material-symbols-outlined mr-1">

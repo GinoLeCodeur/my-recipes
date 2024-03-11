@@ -1,22 +1,29 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { createRecipe } from '@/app/recipe/actions';
-import { useRouter } from 'next/navigation';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { createRecipe, updateRecipe } from '@/app/recipe/actions';
+import { usePathname, useRouter } from 'next/navigation';
 import { Ingredient, Recipe } from '@/types';
-import { CreateRecipeIngredientsForm } from './CreateRecipeIngredientsForm';
+import { RecipeIngredientsForm } from './RecipeIngredientsForm';
 
-export default function CreateRecipeForm() {
+export const RecipeForm = ({
+    recipeData,
+    recipeIngredientsData,
+}: {
+    recipeData?: Recipe;
+    recipeIngredientsData?: Ingredient[];
+}) => {
     const router = useRouter();
+    const pathname = usePathname();
 
-    const [recipeData, setRecipeData] = useState<Recipe>({
+    const [recipe, setRecipe] = useState<Recipe>({
         name: '',
         slug: '',
         description: '',
     });
-    const [recipeIngredientsData, setRecipeIngredientsData] = useState<
-        Ingredient[]
-    >([]);
+    const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>(
+        []
+    );
 
     const handleChange = (
         event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -34,15 +41,15 @@ export default function CreateRecipeForm() {
                 .replace(/\s+/g, '-') // replace spaces with hyphens
                 .replace(/-+/g, '-'); // remove consecutive hyphens
 
-            setRecipeData({
-                ...recipeData,
+            setRecipe({
+                ...recipe,
                 slug: urlFriendlySlug,
             });
         }
 
-        setRecipeData((values) => ({
-            ...values, 
-            [name]: value 
+        setRecipe((values) => ({
+            ...values,
+            [name]: value,
         }));
     };
 
@@ -51,15 +58,33 @@ export default function CreateRecipeForm() {
     ) => {
         event.preventDefault();
 
-        await createRecipe(recipeData, recipeIngredientsData);
+        if (pathname.startsWith('/recipe/manage/edit')) {
+            await updateRecipe(recipe, recipeIngredients);
+        }
+        if (pathname.startsWith('/recipe/manage/add')) {
+            await createRecipe(recipe, recipeIngredients);
+        }
 
         router.push('/recipe/manage');
         router.refresh();
     };
 
     const handleRecipeIngredients = (recipeIngredientsData: Ingredient[]) => {
-        setRecipeIngredientsData([...recipeIngredientsData]);
+        setRecipeIngredients([...recipeIngredientsData]);
+            console.log('handleRecipeIngredients', recipeIngredientsData);
     };
+
+    useEffect(() => {
+        if (recipeData?.name && recipeData.name.length > 0) {
+            setRecipe({ ...recipeData });
+        }
+    }, [recipeData]);
+
+    useEffect(() => {
+        if (recipeIngredientsData && recipeIngredientsData.length > 0) {
+            setRecipeIngredients([...recipeIngredientsData]);
+        }
+    }, [recipeIngredientsData]);
 
     return (
         <form
@@ -73,6 +98,7 @@ export default function CreateRecipeForm() {
                 type="text"
                 name="name"
                 id="name"
+                value={recipe.name}
                 className="mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] form-select"
                 onChange={handleChange}
                 autoComplete="off"
@@ -84,7 +110,7 @@ export default function CreateRecipeForm() {
                 type="text"
                 name="slug"
                 id="slug"
-                value={recipeData.slug}
+                value={recipe.slug}
                 onChange={handleChange}
                 className="mb-4 p-2 autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 disabled
@@ -95,19 +121,22 @@ export default function CreateRecipeForm() {
             <textarea
                 name="description"
                 id="description"
+                value={recipe.description}
                 className="h-[200px] mb-6 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 onChange={handleChange}
-            ></textarea>
+            />
             <h4 className="mb-2 font-bold">Ingredienten</h4>
-            <CreateRecipeIngredientsForm
-                recipeIngredientsData={handleRecipeIngredients}
+            <RecipeIngredientsForm
+                recipeIngredientsData={recipeIngredientsData}
+                handleRecipeIngredients={handleRecipeIngredients}
             />
             <div>
                 <button
                     type="submit"
                     className="mr-4 p-2 text-center bg-[#955961] text-white disabled:bg-[#e5e5e5] disabled:text-[#acacac] disabled:cursor-wait"
                 >
-                    Toevoegen
+                    {pathname.startsWith('/recipe/manage/edit') && `Bewerken`}
+                    {pathname.startsWith('/recipe/manage/add') && `Toevoegen`}
                 </button>
                 <button
                     type="button"
@@ -119,4 +148,4 @@ export default function CreateRecipeForm() {
             </div>
         </form>
     );
-}
+};

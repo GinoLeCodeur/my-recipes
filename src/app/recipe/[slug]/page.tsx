@@ -2,14 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { sql } from '@vercel/postgres';
-import { getRecipe } from '../actions';
+import { getRecipeBySlug } from '../actions';
 
 export default async function Page({
     params: { slug },
 }: {
     params: { slug: string };
 }) {
-    const { rows: recipesData } = await getRecipe(slug);
+    const { rows: recipesData } = await getRecipeBySlug(slug);
 
     if (!recipesData.length) {
         notFound();

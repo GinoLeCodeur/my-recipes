@@ -2,39 +2,49 @@
 
 import { Ingredient } from '@/types';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { getIngredients } from '../../actions';
+import { getIngredients } from '../actions';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { notoSans } from '@/libs/fonts';
 
-export const CreateRecipeIngredientsForm = ({
+export const RecipeIngredientsForm = ({
     recipeIngredientsData,
+    handleRecipeIngredients
 }: {
-    recipeIngredientsData: (data: Ingredient[]) => void
+    recipeIngredientsData?: Ingredient[];
+    handleRecipeIngredients: (data: Ingredient[]) => void;
 }) => {
-    const [ingredientsData, setingredientsData] = useState<Ingredient[]>([]);
+    const [ingredientsData, setIngredientsData] = useState<Ingredient[]>([]);
     const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>([
         {
             ingredientId: 0,
             name: '',
             quantity: 0,
-            unit: ''
-        }
+            unit: '',
+        },
     ]);
+
+    const fetchIngredients = async () => {
+        const { rows: getIngredientsData } = await getIngredients();
+        if (getIngredientsData.length > 0) {
+            setIngredientsData(getIngredientsData);
+        }
+    };
 
     const handleChange =
         (rowIndex: number) => async (event: ChangeEvent<HTMLInputElement>) => {
             const name = event.target.name.split('_')[0];
-            const value = event.target.type !== 'number'
-                ? event.target.value
-                : event.target.valueAsNumber;
+            const value =
+                event.target.type !== 'number'
+                    ? event.target.value
+                    : event.target.valueAsNumber;
 
             const newRecipeIngredients = recipeIngredients.map(
                 (ingredient: Ingredient, index: number) => {
                     if (index === rowIndex) {
                         return {
                             ...ingredient,
-                            [name]: value,
+                            [name]: value
                         };
                     }
                     return ingredient;
@@ -44,28 +54,30 @@ export const CreateRecipeIngredientsForm = ({
             setRecipeIngredients([...newRecipeIngredients]);
         };
 
-    const handleIngredientChange = (rowIndex: number, value: string | null) => {
-        const findIngredient = ingredientsData.find(
-            (ingredient) => ingredient.name === value
-        );
-
-        const newRecipeIngredients = recipeIngredients.map(
-            (ingredient: Ingredient, index: number) => {
-                if (index === rowIndex) {
-                    return {
-                        ...ingredient,
-                        ingredientId: findIngredient
-                            ? findIngredient.ingredientId
-                            : 0,
-                        name: value,
-                        unit: findIngredient?.unit || '',
-                    };
+    const handleIngredientChange = async (rowIndex: number, value: string | null) => {
+        if (ingredientsData.length > 0) {
+            const findIngredient = ingredientsData.find(
+                (ingredient) => ingredient.name === value
+            );
+            const newRecipeIngredients = recipeIngredients.map(
+                (ingredient: Ingredient, index: number) => {
+                    if (index === rowIndex) {
+                        return {
+                            ...ingredient,
+                            ingredientId: findIngredient
+                                ? findIngredient.ingredientId
+                                : 0,
+                            name: value,
+                            unit: findIngredient?.unit || ''
+                        };
+                    }
+                    
+                    return ingredient;
                 }
-                return ingredient;
-            }
-        ) as Ingredient[];
+            ) as Ingredient[];
 
-        setRecipeIngredients([...newRecipeIngredients]);
+            setRecipeIngredients([...newRecipeIngredients]);
+        }
     };
 
     const addRecipeIngredient = () => {
@@ -82,14 +94,13 @@ export const CreateRecipeIngredientsForm = ({
 
     const removeRecipeIngredient = (rowIndex: number) => {
         if (recipeIngredients.length <= 1) {
-            alert();
             setRecipeIngredients([
                 {
                     ingredientId: 0,
                     name: '',
                     quantity: 0,
-                    unit: '',
-                },
+                    unit: ''
+                }
             ]);
             return;
         }
@@ -100,15 +111,17 @@ export const CreateRecipeIngredientsForm = ({
     };
 
     useEffect(() => {
-        const getIngredientSuggestions = async () => {
-            const getIngredientsData = await getIngredients();
-            setingredientsData(getIngredientsData.rows);
-        };
-        getIngredientSuggestions();
+        fetchIngredients();
     }, []);
 
     useEffect(() => {
-        recipeIngredientsData(recipeIngredients);
+        if (recipeIngredientsData && recipeIngredientsData.length > 0) {
+            setRecipeIngredients([...recipeIngredientsData]);
+        }
+    }, [recipeIngredientsData]);
+
+    useEffect(() => {
+        handleRecipeIngredients(recipeIngredients);
     }, [recipeIngredients]);
 
     return (
@@ -161,14 +174,18 @@ export const CreateRecipeIngredientsForm = ({
                                     freeSolo
                                     disableClearable
                                     sx={{
-                                        backgroundColor: '#fff',
                                         '&& .MuiOutlinedInput-root': {
                                             padding: '0 !important',
                                         },
                                         '& input': {
                                             padding: '.5rem !important',
+                                            backgroundColor: '#fff',
                                             fontFamily:
                                                 notoSans.style.fontFamily,
+                                        },
+                                        '& input:disabled': {
+                                            backgroundColor: '#ece6e0',
+                                            WebkitTextFillColor: '#000',
                                         },
                                         '& fieldset': {
                                             border: 'none',
@@ -177,6 +194,7 @@ export const CreateRecipeIngredientsForm = ({
                                     renderInput={(params) => (
                                         <TextField {...params} />
                                     )}
+                                    disabled={ingredientsData.length === 0}
                                 />
                             </td>
                             <td>
@@ -196,9 +214,9 @@ export const CreateRecipeIngredientsForm = ({
                                     name={`unit_${index}`}
                                     value={ingredient.unit}
                                     onChange={handleChange(index)}
-                                    className="w-full p-2"
+                                    className="w-full p-2 disabled:bg-[#ece6e0]"
                                     aria-labelledby="ingredient_unit"
-                                    disabled={ingredient?.ingredientId !== 0}
+                                    disabled={ingredient.ingredientId !== 0}
                                 />
                             </td>
                             <td>
