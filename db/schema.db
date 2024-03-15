@@ -1,4 +1,4 @@
--- DROP TABLE IF EXISTS users, recipes, ingredients, recipes_ingredients, recipe_steps;
+-- DROP TABLE IF EXISTS users, recipes, ingredients, recipe_ingredients, recipe_steps;
 
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,

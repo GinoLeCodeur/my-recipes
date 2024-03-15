@@ -9,7 +9,7 @@ export async function getRecipes() {
     try {
         return await sql<Recipe>`
 			SELECT 
-				recipe_id as "recipeId",
+				recipe_id AS "recipeId",
 				slug, 
 				name, 
 				description,
@@ -25,15 +25,45 @@ export async function getRecipes() {
     }
 }
 
-export async function getRecipeBySlug(slug: string) {
+export async function getRecipesByUser() {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        console.error('Authentication error.');
+        throw new Error('Not authorized.');
+    }
+
     try {
         return await sql<Recipe>`
 			SELECT 
-				recipe_id as "recipeId",
+				recipe_id AS "recipeId",
 				slug, 
 				name, 
 				description,
 				image 
+			FROM recipes
+			WHERE (
+                inactive >= to_timestamp(${Date.now()} / 1000.0)
+				OR inactive IS NULL
+            ) AND created_by = ${session.user.userId}
+			ORDER BY recipe_id DESC;
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to fetch recipes.');
+    }
+}
+
+export async function getRecipeBySlug(slug: string) {
+    try {
+        return await sql<Recipe>`
+			SELECT 
+				recipe_id AS "recipeId",
+				slug, 
+				name, 
+				description,
+				image,
+                created_by AS "createdBy"
 			FROM recipes
 			WHERE (
 				inactive >= to_timestamp(${Date.now()} / 1000.0)
@@ -97,7 +127,7 @@ export async function createRecipe(
 		`;
 
         if (createRecipe.length > 0 && createRecipe[0].recipeId) {
-            recipeIngredients?.map(async (ingredient) => {
+            recipeIngredients?.map(async (ingredient, index) => {
                 const { rows: createIngredientRes } = await createIngredient(
                     ingredient
                 );
@@ -105,8 +135,19 @@ export async function createRecipe(
 
                 await createRecipeIngredient(
                     createRecipe[0].recipeId,
-                    ingredient
+                    ingredient,
+                    index
                 );
+            });
+        }
+
+        if (createRecipe.length > 0 && createRecipe[0].recipeId) {
+            recipeSteps?.map(async (step, index) => {
+                if (step.recipeStepId === 0) {
+                    await createRecipeStep(createRecipe[0].recipeId, step, index);
+                } else {
+                    await updateRecipeStep(step, index);
+                }
             });
         }
     } catch (error) {
@@ -123,8 +164,11 @@ export async function updateRecipe(
     const session = await getServerSession(authOptions);
     const { rows: checkUserRecipe } = await getRecipeById(recipe.recipeId as number);
 
-    if (session?.user.userId !== checkUserRecipe[0].createdBy && session?.user.role !== UserRole.ADMIN) {
-        console.error('Authentication error.');
+    if (
+        session?.user.userId !== checkUserRecipe[0].createdBy && 
+        session?.user.role !== UserRole.ADMIN
+    ) {
+        console.error('Authorization error.');
         throw new Error('Not authorized.');
     }
 
@@ -143,7 +187,7 @@ export async function updateRecipe(
 		await deleteRecipeIngredients(updateRecipe[0].recipeId);
 
         if (updateRecipe.length > 0 && updateRecipe[0].recipeId) {
-            recipeIngredients?.map(async (ingredient) => {
+            recipeIngredients?.map(async (ingredient, index) => {
                 const { rows: createIngredientRes } = await createIngredient(
                     ingredient
                 );
@@ -151,8 +195,19 @@ export async function updateRecipe(
 
                 await createRecipeIngredient(
                     updateRecipe[0].recipeId,
-                    ingredient
+                    ingredient,
+                    index
                 );
+            });
+        }
+
+        if (createRecipe.length > 0 && updateRecipe[0].recipeId) {
+            recipeSteps?.map(async (step, index) => {
+                if (step.recipeStepId === 0) {
+                    await createRecipeStep(updateRecipe[0].recipeId, step, index);
+                } else {
+                    await updateRecipeStep(step, index);
+                }
             });
         }
     } catch (error) {
@@ -164,8 +219,13 @@ export async function updateRecipe(
 export async function deleteRecipe(recipeId: number) {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-        console.error('Authentication error.');
+    const { rows: checkUserRecipe } = await getRecipeById(recipeId);
+
+    if (
+        session?.user.userId !== checkUserRecipe[0].createdBy &&
+        session?.user.role !== UserRole.ADMIN
+    ) {
+        console.error('Authorization error.');
         throw new Error('Not authorized.');
     }
 
@@ -234,7 +294,7 @@ export async function createIngredient(ingredient: Ingredient) {
 
 export async function getRecipeIngredients(recipeId: number) {
     try {
-        return await sql<Recipe>`
+        return await sql<Ingredient>`
 			SELECT 
 				ingredients.ingredient_id AS "ingredientId",
 				name,
@@ -243,7 +303,8 @@ export async function getRecipeIngredients(recipeId: number) {
 			FROM recipe_ingredients
 			INNER JOIN ingredients
 				ON ingredients.ingredient_id = recipe_ingredients.ingredient_id
-			WHERE recipe_id = ${recipeId};
+			WHERE recipe_id = ${recipeId}
+            ORDER BY ingredient_order ASC;
 		`;
     } catch (error) {
         console.error('Database error:', error);
@@ -253,7 +314,8 @@ export async function getRecipeIngredients(recipeId: number) {
 
 export async function createRecipeIngredient(
     recipeId: number,
-    ingredient: Ingredient
+    ingredient: Ingredient,
+    orderIndex: number
 ) {
     const session = await getServerSession(authOptions);
 
@@ -263,15 +325,17 @@ export async function createRecipeIngredient(
     }
 
     try {
-        await sql<Ingredient>`
+        await sql`
 			INSERT INTO recipe_ingredients (
 				recipe_id,
 				ingredient_id,
-				quantity
+				quantity,
+                ingredient_order
 			) VALUES (
 				${recipeId},
 				${ingredient.ingredientId},
-				${ingredient.quantity}
+				${ingredient.quantity},
+                ${orderIndex}
 			);
 		`;
     } catch (error) {

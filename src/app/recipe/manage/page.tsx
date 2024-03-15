@@ -1,10 +1,18 @@
 import Image from 'next/image';
 import Link from "next/link";
 import { RemoveRecipeButton } from "@/app/recipe/manage/RemoveRecipeButton";
-import { getRecipes } from '@/app/recipe/actions';
+import { getRecipes, getRecipesByUser } from '@/app/recipe/actions';
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import { getServerSession } from 'next-auth/next';
+import { UserRole } from '@/types';
 
 export default async function Page() {
-    const { rows: recipesData } = await getRecipes();
+    const session = await getServerSession(authOptions);
+    
+    const { rows: recipesData } =
+        session?.user.role === UserRole.ADMIN
+            ? await getRecipes()
+            : await getRecipesByUser();
     
     return (
         <>

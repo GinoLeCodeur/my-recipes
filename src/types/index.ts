@@ -18,6 +18,7 @@ export type Ingredient = {
     name?: string;
     quantity?: number;
     unit?: string;
+    order?: number;
 };
 
 export const enum UserRole {
