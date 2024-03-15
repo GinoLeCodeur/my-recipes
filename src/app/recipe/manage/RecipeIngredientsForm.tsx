@@ -55,29 +55,28 @@ export const RecipeIngredientsForm = ({
         };
 
     const handleIngredientChange = async (rowIndex: number, value: string | null) => {
-        if (ingredientsData.length > 0) {
-            const findIngredient = ingredientsData.find(
-                (ingredient) => ingredient.name === value
-            );
-            const newRecipeIngredients = recipeIngredients.map(
-                (ingredient: Ingredient, index: number) => {
-                    if (index === rowIndex) {
-                        return {
-                            ...ingredient,
-                            ingredientId: findIngredient
-                                ? findIngredient.ingredientId
-                                : 0,
-                            name: value,
-                            unit: findIngredient?.unit || ''
-                        };
-                    }
-                    
-                    return ingredient;
+        const findIngredient = ingredientsData.find(
+            (ingredient) => ingredient.name === value
+        );
+        const newRecipeIngredients = recipeIngredients.map(
+            (ingredient: Ingredient, index: number) => {
+                if (index === rowIndex) {
+                    return {
+                        ...ingredient,
+                        ingredientId:
+                            findIngredient?.ingredientId ||
+                            ingredient.ingredientId ||
+                            0,
+                        name: value,
+                        unit: findIngredient?.unit || ingredient.unit,
+                    };
                 }
-            ) as Ingredient[];
+                
+                return ingredient;
+            }
+        ) as Ingredient[];
 
-            setRecipeIngredients([...newRecipeIngredients]);
-        }
+        setRecipeIngredients([...newRecipeIngredients]);
     };
 
     const addRecipeIngredient = () => {
@@ -126,6 +125,7 @@ export const RecipeIngredientsForm = ({
 
     return (
         <>
+            <h4 className="mb-2 font-bold">Ingredienten</h4>
             <table className="!border-separate border-spacing-[2px] -m-[2px]">
                 <thead>
                     <tr>
@@ -194,7 +194,6 @@ export const RecipeIngredientsForm = ({
                                     renderInput={(params) => (
                                         <TextField {...params} />
                                     )}
-                                    disabled={ingredientsData.length === 0}
                                 />
                             </td>
                             <td>

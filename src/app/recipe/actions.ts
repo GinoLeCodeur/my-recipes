@@ -362,3 +362,69 @@ export async function deleteRecipeIngredients(recipeId: number) {
         throw new Error('Failed to delete recipe ingredients.');
     }
 }
+
+export async function getRecipeSteps(recipeId: number) {
+    try {
+        return await sql<RecipeStep>`
+            SELECT 
+                recipe_step_id AS "recipeStepId",
+                description
+            FROM 
+                recipe_steps
+            WHERE recipe_id = ${recipeId}
+            ORDER BY step_order ASC
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to fetch recipe steps.');
+    }
+}
+
+export async function createRecipeStep(recipeId: number, step: RecipeStep, orderIndex: number) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        console.error('Authentication error.');
+        throw new Error('Not authorized.');
+    }
+
+    try {
+        await sql`
+			INSERT INTO recipe_steps (
+				recipe_id,
+				description,
+                step_order
+			) VALUES (
+				${recipeId},
+				${step.description},
+				${orderIndex}
+			);
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to create recipe step.');
+    }
+}
+
+export async function updateRecipeStep(step: RecipeStep, orderIndex: number) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        console.error('Authentication error.');
+        throw new Error('Not authorized.');
+    }
+
+    try {
+        await sql`
+			UPDATE recipe_steps
+            SET
+                description = ${step.description},
+                step_order = ${orderIndex}
+            WHERE
+                recipe_step_id = ${step.recipeStepId}
+		`;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to update recipe step.');
+    }
+}

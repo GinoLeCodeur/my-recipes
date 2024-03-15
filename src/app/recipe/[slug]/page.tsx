@@ -1,8 +1,6 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { sql } from '@vercel/postgres';
-import { getRecipeBySlug } from '../actions';
+import { getRecipeBySlug, getRecipeIngredients, getRecipeSteps } from '../actions';
 
 export default async function Page({
     params: { slug },
@@ -14,32 +12,14 @@ export default async function Page({
     if (!recipesData.length) {
         notFound();
     }
+    
+    const { rows: ingredientsData } = await getRecipeIngredients(
+        recipesData[0].recipeId as number
+    );
 
-    const { rows: ingredientsData } = await sql`
-        SELECT 
-            ingredients.ingredient_id AS "ingredientId",
-            name,
-            quantity,
-            unit,
-            ingredient_order AS "ingredientOrder"
-        FROM ingredients
-            INNER JOIN recipe_ingredients
-                ON recipe_ingredients.ingredient_id = ingredients.ingredient_id
-        WHERE recipe_ingredients.recipe_id = ${recipesData[0].recipeId}
-        ORDER BY
-            ingredient_order ASC
-    `;
-
-    const { rows: recipeStepsData } = await sql`
-        SELECT 
-            recipe_step_id AS "recipeStepId",
-            description
-        FROM 
-            recipe_steps
-        WHERE recipe_id = ${recipesData[0].recipeId}
-        ORDER BY
-            step_order ASC
-    `;
+    const { rows: recipeStepsData } = await getRecipeSteps(
+        recipesData[0].recipeId as number
+    );
 
     return (
         <article>

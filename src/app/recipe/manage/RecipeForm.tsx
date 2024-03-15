@@ -3,15 +3,18 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { createRecipe, updateRecipe } from '@/app/recipe/actions';
 import { usePathname, useRouter } from 'next/navigation';
-import { Ingredient, Recipe } from '@/types';
+import { Ingredient, Recipe, RecipeStep } from '@/types';
 import { RecipeIngredientsForm } from './RecipeIngredientsForm';
+import { RecipeStepsForm } from './RecipeStepsForm';
 
 export const RecipeForm = ({
     recipeData,
     recipeIngredientsData,
+    recipeStepsData,
 }: {
     recipeData?: Recipe;
     recipeIngredientsData?: Ingredient[];
+    recipeStepsData?: RecipeStep[];
 }) => {
     const router = useRouter();
     const pathname = usePathname();
@@ -24,6 +27,7 @@ export const RecipeForm = ({
     const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>(
         []
     );
+    const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
 
     const handleChange = (
         event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,12 +61,12 @@ export const RecipeForm = ({
         event: FormEvent<EventTarget | HTMLFormElement>
     ) => {
         event.preventDefault();
-
+        
         if (pathname.startsWith('/recipe/manage/edit')) {
-            await updateRecipe(recipe, recipeIngredients);
+            await updateRecipe(recipe, recipeIngredients, recipeSteps);
         }
         if (pathname.startsWith('/recipe/manage/add')) {
-            await createRecipe(recipe, recipeIngredients);
+            await createRecipe(recipe, recipeIngredients, recipeSteps);
         }
 
         router.push('/recipe/manage');
@@ -71,7 +75,10 @@ export const RecipeForm = ({
 
     const handleRecipeIngredients = (recipeIngredientsData: Ingredient[]) => {
         setRecipeIngredients([...recipeIngredientsData]);
-            console.log('handleRecipeIngredients', recipeIngredientsData);
+    };
+
+    const handleRecipeSteps = (recipeStepsData: RecipeStep[]) => {
+        setRecipeSteps([...recipeStepsData]);
     };
 
     useEffect(() => {
@@ -125,10 +132,13 @@ export const RecipeForm = ({
                 className="h-[200px] mb-6 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 onChange={handleChange}
             />
-            <h4 className="mb-2 font-bold">Ingredienten</h4>
             <RecipeIngredientsForm
                 recipeIngredientsData={recipeIngredientsData}
                 handleRecipeIngredients={handleRecipeIngredients}
+            />
+            <RecipeStepsForm
+                recipeStepsData={recipeStepsData}
+                handleRecipeSteps={handleRecipeSteps}
             />
             <div>
                 <button
