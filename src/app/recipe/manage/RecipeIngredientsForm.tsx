@@ -63,10 +63,7 @@ export const RecipeIngredientsForm = ({
                 if (index === rowIndex) {
                     return {
                         ...ingredient,
-                        ingredientId:
-                            findIngredient?.ingredientId ||
-                            ingredient.ingredientId ||
-                            0,
+                        ingredientId: findIngredient?.ingredientId || 0,
                         name: value,
                         unit: findIngredient?.unit || ingredient.unit,
                     };
@@ -124,16 +121,16 @@ export const RecipeIngredientsForm = ({
     }, [recipeIngredients]);
 
     return (
-        <>
-            <h4 className="mb-2 font-bold">Ingredienten</h4>
-            <table className="!border-separate border-spacing-[2px] -m-[2px]">
+        <div className="mb-6">
+            <h4 className="mb-2 font-bold">Ingrediënten</h4>
+            <table className="w-full !border-separate border-spacing-[2px] -m-[2px]">
                 <thead>
                     <tr>
                         <th
                             className="text-left font-normal italic text-sm"
                             id="ingredient_name"
                         >
-                            Ingredient naam
+                            Ingrediënt naam
                         </th>
                         <th
                             className="text-left w-[80px] font-normal italic text-sm"
@@ -155,7 +152,7 @@ export const RecipeIngredientsForm = ({
                         <tr key={index}>
                             <td>
                                 <Autocomplete
-                                    value={ingredient.name}
+                                    inputValue={ingredient.name}
                                     onInputChange={(e, value) =>
                                         handleIngredientChange(
                                             index,
@@ -221,10 +218,11 @@ export const RecipeIngredientsForm = ({
                             <td>
                                 <button
                                     type="button"
-                                    className="block w-[40px] h-[40px] bg-[#d7b4b9]"
+                                    className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
                                     onClick={() =>
                                         removeRecipeIngredient(index)
                                     }
+                                    title="Ingrediënt verwijderen"
                                 >
                                     <span className="block material-symbols-outlined -mb-[2px] text-white">
                                         delete
@@ -238,7 +236,7 @@ export const RecipeIngredientsForm = ({
             <div>
                 <button
                     type="button"
-                    className="inline-flex items-center mt-1 mb-4 text-sm"
+                    className="inline-flex items-center mt-1 text-sm"
                     onClick={addRecipeIngredient}
                 >
                     <span className="block material-symbols-outlined mr-1 -mb-[1px]">
@@ -247,6 +245,6 @@ export const RecipeIngredientsForm = ({
                     Ingredient toevoegen
                 </button>
             </div>
-        </>
+        </div>
     );
 };

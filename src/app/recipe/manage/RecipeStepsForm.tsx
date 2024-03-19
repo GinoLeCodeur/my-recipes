@@ -73,7 +73,7 @@ export const RecipeStepsForm = ({
     }, [recipeSteps]);
 
     return (
-        <>
+        <div className="mb-6">
             <h4 id="recipe_steps" className="mb-2 font-bold">
                 Stappen
             </h4>
@@ -88,8 +88,9 @@ export const RecipeStepsForm = ({
                     />
                     <button
                         type="button"
-                        className="block w-[40px] h-[40px] bg-[#d7b4b9]"
+                        className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
                         onClick={() => removeRecipeStep(index)}
+                        title="Stap verwijderen"
                     >
                         <span className="block material-symbols-outlined -mb-[2px] text-white">
                             delete
@@ -100,7 +101,7 @@ export const RecipeStepsForm = ({
             <div>
                 <button
                     type="button"
-                    className="inline-flex items-center mt-1 mb-4 text-sm"
+                    className="inline-flex items-center mt-1 text-sm"
                     onClick={addRecipeStep}
                 >
                     <span className="block material-symbols-outlined mr-1 -mb-[1px]">
@@ -109,6 +110,6 @@ export const RecipeStepsForm = ({
                     Stap toevoegen
                 </button>
             </div>
-        </>
+        </div>
     );
 };
