@@ -40,7 +40,8 @@ export async function getRecipesByUser() {
 				slug, 
 				name, 
 				description,
-				image 
+				image,
+                persons
 			FROM recipes
 			WHERE (
                 inactive >= to_timestamp(${Date.now()} / 1000.0)
@@ -63,6 +64,7 @@ export async function getRecipeBySlug(slug: string) {
 				name, 
 				description,
 				image,
+                persons,
                 created_by AS "createdBy"
 			FROM recipes
 			WHERE (
@@ -116,11 +118,13 @@ export async function createRecipe(
 				name,
 				slug,
 				description,
+                persons,
 				created_by
 			) VALUES (
 				${recipe.name},
 				${recipe.slug},
 				${recipe.description},
+				${recipe.persons},
 				${session.user.userId}
 			)
 			RETURNING recipe_id AS "recipeId";
@@ -178,7 +182,8 @@ export async function updateRecipe(
             SET
                 name = ${recipe.name},
                 slug = ${recipe.slug},
-                description = ${recipe.description}
+                description = ${recipe.description},
+                persons = ${recipe.persons}
             WHERE
                 recipe_id = ${recipe.recipeId}
 			RETURNING recipe_id AS "recipeId";

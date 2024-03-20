@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     slug VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
     image VARCHAR(255),
+    persons INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(user_id),
     inactive TIMESTAMP

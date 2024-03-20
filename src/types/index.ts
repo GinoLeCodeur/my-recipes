@@ -3,6 +3,7 @@ export type Recipe = {
     name: string;
     slug: string;
     description?: string;
+    persons?: number;
     image?: string;
     createdBy?: number;
 };

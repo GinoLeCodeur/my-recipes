@@ -121,9 +121,8 @@ export const RecipeIngredientsForm = ({
     }, [recipeIngredients]);
 
     return (
-        <div className="mb-6">
-            <h4 className="mb-2 font-bold">Ingrediënten</h4>
-            <table className="w-full !border-separate border-spacing-[2px] -m-[2px]">
+        <>
+            <table className="w-[calc(100%+4px)] !border-separate border-spacing-[2px] -m-[2px]">
                 <thead>
                     <tr>
                         <th
@@ -245,6 +244,6 @@ export const RecipeIngredientsForm = ({
                     Ingredient toevoegen
                 </button>
             </div>
-        </div>
+        </>
     );
 };

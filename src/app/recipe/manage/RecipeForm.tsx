@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Ingredient, Recipe, RecipeStep } from '@/types';
 import { RecipeIngredientsForm } from './RecipeIngredientsForm';
 import { RecipeStepsForm } from './RecipeStepsForm';
+import { RecipePersonsForm } from './RecipePersonsForm';
 
 export const RecipeForm = ({
     recipeData,
@@ -23,6 +24,7 @@ export const RecipeForm = ({
         name: '',
         slug: '',
         description: '',
+        persons: 0
     });
     const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>(
         []
@@ -71,6 +73,13 @@ export const RecipeForm = ({
 
         router.push('/recipe/manage');
         router.refresh();
+    };
+
+    const handleRecipePersons = (recipePersonsData: number) => {
+        setRecipe({
+            ...recipe,
+            persons: recipePersonsData
+        });
     };
 
     const handleRecipeIngredients = (recipeIngredientsData: Ingredient[]) => {
@@ -129,13 +138,20 @@ export const RecipeForm = ({
                 name="description"
                 id="description"
                 value={recipe.description}
-                className="h-[200px] mb-6 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
+                className="h-[200px] mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 onChange={handleChange}
             />
-            <RecipeIngredientsForm
-                recipeIngredientsData={recipeIngredientsData}
-                handleRecipeIngredients={handleRecipeIngredients}
-            />
+            <div className="mb-6">
+                <h4 className="mb-2 font-bold">Ingrediënten</h4>
+                <RecipePersonsForm
+                    recipePersonsData={recipe.persons}
+                    handleRecipePersons={handleRecipePersons}
+                />
+                <RecipeIngredientsForm
+                    recipeIngredientsData={recipeIngredientsData}
+                    handleRecipeIngredients={handleRecipeIngredients}
+                />
+            </div>
             <RecipeStepsForm
                 recipeStepsData={recipeStepsData}
                 handleRecipeSteps={handleRecipeSteps}
