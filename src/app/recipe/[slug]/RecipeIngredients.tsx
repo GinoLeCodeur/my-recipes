@@ -24,7 +24,7 @@ export const RecipeIngredients = ({
         const defaultQuantity = ingredient.quantity || 0;
         const defaultPersons = recipeData.persons || 0;
 
-        return (defaultQuantity / defaultPersons) * selectedPersons;
+        return +((defaultQuantity / defaultPersons) * selectedPersons).toFixed(1);
     };
 
     useEffect(() => {
