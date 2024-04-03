@@ -7,6 +7,7 @@ import { Ingredient, Recipe, RecipeStep } from '@/types';
 import { RecipeIngredientsForm } from './RecipeIngredientsForm';
 import { RecipeStepsForm } from './RecipeStepsForm';
 import { RecipePersonsForm } from './RecipePersonsForm';
+import { RecipeImageForm } from './RecipeImageForm';
 
 export const RecipeForm = ({
     recipeData,
@@ -26,9 +27,8 @@ export const RecipeForm = ({
         description: '',
         persons: 0
     });
-    const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>(
-        []
-    );
+    const [recipeImage, setRecipeImage] = useState<File | null>(null);
+    const [recipeIngredients, setRecipeIngredients] = useState<Ingredient[]>([]);
     const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
 
     const handleChange = (
@@ -39,13 +39,13 @@ export const RecipeForm = ({
 
         if (name === 'name') {
             const urlFriendlySlug = value
-                .normalize('NFKD') // split accented characters into their base characters and diacritical marks
-                .replace(/[\u0300-\u036f]/g, '') // remove all the accents, which happen to be all in the \u03xx UNICODE block.
-                .trim() // trim leading or trailing whitespace
-                .toLowerCase() // convert to lowercase
-                .replace(/[^a-z0-9 -]/g, '') // remove non-alphanumeric characters
-                .replace(/\s+/g, '-') // replace spaces with hyphens
-                .replace(/-+/g, '-'); // remove consecutive hyphens
+                .normalize('NFKD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9 -]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
 
             setRecipe({
                 ...recipe,
@@ -63,16 +63,38 @@ export const RecipeForm = ({
         event: FormEvent<EventTarget | HTMLFormElement>
     ) => {
         event.preventDefault();
+        const formData = new FormData();
+        formData.append('recipeImage', recipeImage as File);
         
         if (pathname.startsWith('/recipe/manage/edit')) {
-            await updateRecipe(recipe, recipeIngredients, recipeSteps);
+            await updateRecipe(
+                recipe,
+                formData,
+                recipeIngredients,
+                recipeSteps
+            );
         }
         if (pathname.startsWith('/recipe/manage/add')) {
-            await createRecipe(recipe, recipeIngredients, recipeSteps);
+            await createRecipe(
+                recipe,
+                formData,
+                recipeIngredients,
+                recipeSteps
+            );
         }
 
         router.push('/recipe/manage');
         router.refresh();
+    };
+
+    const handleRecipeCurrentImage = (recipeCurrentImageData?: string) => {
+        setRecipe({
+            ...recipe,
+            image: recipeCurrentImageData,
+        });
+    };
+    const handleRecipeNewImage = (recipeImageData?: File | null) => {
+        setRecipeImage(recipeImageData || null);
     };
 
     const handleRecipePersons = (recipePersonsData: number) => {
@@ -140,6 +162,12 @@ export const RecipeForm = ({
                 value={recipe.description}
                 className="h-[200px] mb-4 p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]"
                 onChange={handleChange}
+            />
+            <label className="mb-1">Recept afbeelding</label>
+            <RecipeImageForm
+                recipeImageData={recipe.image}
+                handleRecipeCurrentImage={handleRecipeCurrentImage}
+                handleRecipeNewImage={handleRecipeNewImage}
             />
             <div className="mb-6">
                 <h4 className="mb-2 font-bold">Ingrediënten</h4>

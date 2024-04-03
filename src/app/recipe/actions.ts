@@ -4,6 +4,7 @@ import { Ingredient, Recipe, RecipeStep, UserRole } from '@/types';
 import { sql } from '@vercel/postgres';
 import { authOptions } from '../api/auth/[...nextauth]/authOptions';
 import { getServerSession } from 'next-auth/next';
+import { del, put } from '@vercel/blob';
 
 export async function getRecipes() {
     try {
@@ -102,6 +103,7 @@ export async function getRecipeById(recipeId: number) {
 
 export async function createRecipe(
     recipe: Recipe,
+    recipeImage: FormData | null,
     recipeIngredients?: Ingredient[],
     recipeSteps?: RecipeStep[]
 ) {
@@ -131,6 +133,18 @@ export async function createRecipe(
 		`;
 
         if (createRecipe.length > 0 && createRecipe[0].recipeId) {
+            if (
+                recipeImage &&
+                recipeImage.get('recipeImage') &&
+                recipeImage.get('recipeImage') !== 'null'
+            ) {
+                await createRecipeImage(
+                    null,
+                    {...recipe, recipeId: createRecipe[0].recipeId},
+                    recipeImage.get('recipeImage') as File
+                );
+            }
+
             recipeIngredients?.map(async (ingredient, index) => {
                 const { rows: createIngredientRes } = await createIngredient(
                     ingredient
@@ -143,12 +157,14 @@ export async function createRecipe(
                     index
                 );
             });
-        }
-
-        if (createRecipe.length > 0 && createRecipe[0].recipeId) {
+            
             recipeSteps?.map(async (step, index) => {
                 if (step.recipeStepId === 0) {
-                    await createRecipeStep(createRecipe[0].recipeId, step, index);
+                    await createRecipeStep(
+                        createRecipe[0].recipeId,
+                        step,
+                        index
+                    );
                 } else {
                     await updateRecipeStep(step, index);
                 }
@@ -162,14 +178,17 @@ export async function createRecipe(
 
 export async function updateRecipe(
     recipe: Recipe,
+    recipeImage: FormData | null,
     recipeIngredients?: Ingredient[],
     recipeSteps?: RecipeStep[]
 ) {
     const session = await getServerSession(authOptions);
-    const { rows: checkUserRecipe } = await getRecipeById(recipe.recipeId as number);
+    const { rows: checkUserRecipe } = await getRecipeById(
+        recipe.recipeId as number
+    );
 
     if (
-        session?.user.userId !== checkUserRecipe[0].createdBy && 
+        session?.user.userId !== checkUserRecipe[0].createdBy &&
         session?.user.role !== UserRole.ADMIN
     ) {
         console.error('Authorization error.');
@@ -189,9 +208,26 @@ export async function updateRecipe(
 			RETURNING recipe_id AS "recipeId";
 		`;
 
-		await deleteRecipeIngredients(updateRecipe[0].recipeId);
+        await deleteRecipeIngredients(updateRecipe[0].recipeId);
 
         if (updateRecipe.length > 0 && updateRecipe[0].recipeId) {
+            if (checkUserRecipe[0].image && !recipe.image) {
+                await deleteRecipeImage(checkUserRecipe[0]);
+            }
+            if (
+                recipeImage &&
+                (
+                    recipeImage.get('recipeImage') &&
+                    recipeImage.get('recipeImage') !== 'null'
+                )
+            ) {
+                await createRecipeImage(
+                    checkUserRecipe[0],
+                    recipe,
+                    recipeImage.get('recipeImage') as File
+                );
+            }
+
             recipeIngredients?.map(async (ingredient, index) => {
                 const { rows: createIngredientRes } = await createIngredient(
                     ingredient
@@ -204,12 +240,14 @@ export async function updateRecipe(
                     index
                 );
             });
-        }
 
-        if (createRecipe.length > 0 && updateRecipe[0].recipeId) {
             recipeSteps?.map(async (step, index) => {
                 if (step.recipeStepId === 0) {
-                    await createRecipeStep(updateRecipe[0].recipeId, step, index);
+                    await createRecipeStep(
+                        updateRecipe[0].recipeId,
+                        step,
+                        index
+                    );
                 } else {
                     await updateRecipeStep(step, index);
                 }
@@ -235,6 +273,8 @@ export async function deleteRecipe(recipeId: number) {
     }
 
     try {
+        await deleteRecipeImage(checkUserRecipe[0]);
+        
         await sql`
 			UPDATE recipes
 			SET inactive = to_timestamp(${Date.now()} / 1000.0)
@@ -243,6 +283,51 @@ export async function deleteRecipe(recipeId: number) {
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to delete recipe.');
+    }
+}
+
+async function createRecipeImage(previousRecipe: Recipe | null, recipe: Recipe, recipeImage: File) {
+    if (previousRecipe && previousRecipe.image) {
+        await deleteRecipeImage(previousRecipe as Recipe);
+    }
+
+    try {
+        const fileExtension = recipeImage.name.slice(recipeImage.name.lastIndexOf('.'));
+        const fileName = `${recipe.recipeId}-${recipe.slug}.${fileExtension}`;
+        
+        const file = await put(
+            `recipe_images/${fileName}`,
+            recipeImage,
+            {
+                access: 'public',
+            }
+        );
+
+        await sql`
+			UPDATE recipes
+            SET
+                image = ${file.url}
+            WHERE
+                recipe_id = ${recipe.recipeId}
+		`;
+    } catch (error) {
+        throw new Error('Failed to create recipe image.');
+    }
+}
+
+async function deleteRecipeImage(previousRecipe: Recipe) {
+    try {
+        await del(previousRecipe.image as string);
+
+        await sql`
+    		UPDATE recipes
+            SET
+                image = null
+            WHERE
+                recipe_id = ${previousRecipe.recipeId}
+    	`;
+    } catch (error) {
+        throw new Error('Failed to delete recipe image.');
     }
 }
 

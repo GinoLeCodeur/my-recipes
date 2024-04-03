@@ -27,7 +27,10 @@ export default async function Page({
             <header className="mb-4">
                 <picture>
                     <Image
-                        src="https://placehold.co/600x400?text=Hello+world"
+                        src={`${
+                            recipeData[0].image ||
+                            'https://placehold.co/600x400?text=Hello+world'
+                        }`}
                         alt={recipeData[0].name}
                         width="600"
                         height="400"
@@ -55,7 +58,10 @@ export default async function Page({
                     )}
                 </main>
                 <aside className="sticky top-[0] w-[300px]">
-                    <RecipeIngredients recipeData={recipeData[0]} recipeIngredientsData={ingredientsData} />
+                    <RecipeIngredients
+                        recipeData={recipeData[0]}
+                        recipeIngredientsData={ingredientsData}
+                    />
                 </aside>
             </div>
         </article>

@@ -28,7 +28,6 @@ export const RecipeIngredients = ({
     };
 
     useEffect(() => {
-        console.log(recipeData);
         setSelectedPersons(recipeData?.persons || 1);
     }, [recipeData]);
 

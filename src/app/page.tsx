@@ -19,7 +19,10 @@ export default async function Home() {
                                 >
                                     <picture>
                                         <Image
-                                            src="https://placehold.co/600x400?text=Hello+world"
+                                            src={`${
+                                                recipe.image ||
+                                                'https://placehold.co/600x400?text=Hello+world'
+                                            }`}
                                             alt={recipe.name}
                                             width="600"
                                             height="400"
