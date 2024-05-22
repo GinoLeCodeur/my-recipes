@@ -34,40 +34,42 @@ export const RecipeIngredients = ({
     return (
         <>
             <h4 className="font-bold">Ingrediënten</h4>
-            <div className="flex my-2">
-                <button
-                    type="button"
-                    className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
-                    onClick={removePerson}
-                >
-                    <span className="block material-symbols-outlined text-white">
-                        remove
-                    </span>
-                </button>
-                <div className="flex-1 mx-[4px] p-2 bg-white text-center">
-                    {selectedPersons +
-                        (selectedPersons > 1 ? ' personen' : ' persoon')}
-                </div>
-                <button
-                    type="button"
-                    className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
-                    onClick={addPerson}
-                >
-                    <span className="block material-symbols-outlined -mb-[1px] text-white">
-                        add
-                    </span>
-                </button>
-            </div>
             {recipeIngredientsData.length ? (
-                <ol>
-                    {recipeIngredientsData.map((ingredient) => (
-                        <li key={ingredient.ingredientId}>
-                            {calcIngredientQty(ingredient)}
-                            {` ${ingredient.unit?.toLowerCase()}`}
-                            {` ${ingredient.name?.toLowerCase()}`}
-                        </li>
-                    ))}
-                </ol>
+                <>
+                    <div className="flex my-2">
+                        <button
+                            type="button"
+                            className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
+                            onClick={removePerson}
+                        >
+                            <span className="block material-symbols-outlined text-white">
+                                remove
+                            </span>
+                        </button>
+                        <div className="flex-1 mx-[4px] p-2 bg-white text-center">
+                            {selectedPersons +
+                                (selectedPersons > 1 ? ' personen' : ' persoon')}
+                        </div>
+                        <button
+                            type="button"
+                            className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
+                            onClick={addPerson}
+                        >
+                            <span className="block material-symbols-outlined -mb-[1px] text-white">
+                                add
+                            </span>
+                        </button>
+                    </div>
+                    <ol>
+                        {recipeIngredientsData.map((ingredient) => (
+                            <li key={ingredient.ingredientId}>
+                                {calcIngredientQty(ingredient)}
+                                {` ${ingredient.unit?.toLowerCase()}`}
+                                {` ${ingredient.name?.toLowerCase()}`}
+                            </li>
+                        ))}
+                    </ol>
+                </>
             ) : (
                 <p>Geen ingrediënten gevonden</p>
             )}
