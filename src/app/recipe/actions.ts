@@ -159,15 +159,11 @@ export async function createRecipe(
             });
             
             recipeSteps?.map(async (step, index) => {
-                if (step.recipeStepId === 0) {
-                    await createRecipeStep(
-                        createRecipe[0].recipeId,
-                        step,
-                        index
-                    );
-                } else {
-                    await updateRecipeStep(step, index);
-                }
+                await createRecipeStep(
+                    createRecipe[0].recipeId,
+                    step,
+                    index
+                );
             });
         }
     } catch (error) {
@@ -209,6 +205,7 @@ export async function updateRecipe(
 		`;
 
         await deleteRecipeIngredients(updateRecipe[0].recipeId);
+        await deleteRecipeStep(updateRecipe[0].recipeId);
 
         if (updateRecipe.length > 0 && updateRecipe[0].recipeId) {
             if (checkUserRecipe[0].image && !recipe.image) {
@@ -242,15 +239,11 @@ export async function updateRecipe(
             });
 
             recipeSteps?.map(async (step, index) => {
-                if (step.recipeStepId === 0) {
-                    await createRecipeStep(
-                        updateRecipe[0].recipeId,
-                        step,
-                        index
-                    );
-                } else {
-                    await updateRecipeStep(step, index);
-                }
+                await createRecipeStep(
+                    updateRecipe[0].recipeId,
+                    step,
+                    index
+                );
             });
         }
     } catch (error) {
@@ -496,7 +489,7 @@ export async function createRecipeStep(recipeId: number, step: RecipeStep, order
     }
 }
 
-export async function updateRecipeStep(step: RecipeStep, orderIndex: number) {
+export async function deleteRecipeStep(recipeId: number) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -506,15 +499,11 @@ export async function updateRecipeStep(step: RecipeStep, orderIndex: number) {
 
     try {
         await sql`
-			UPDATE recipe_steps
-            SET
-                description = ${step.description},
-                step_order = ${orderIndex}
-            WHERE
-                recipe_step_id = ${step.recipeStepId}
+			DELETE FROM recipe_steps
+			WHERE recipe_id = ${recipeId};
 		`;
     } catch (error) {
-        console.error('Database error:', error);
-        throw new Error('Failed to update recipe step.');
+        console.error('Database Error:', error);
+        throw new Error('Failed to delete recipe step.');
     }
 }
