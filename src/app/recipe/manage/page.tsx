@@ -1,19 +1,21 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import Image from 'next/image';
-import Link from "next/link";
-import { RemoveRecipeButton } from "@/app/recipe/manage/RemoveRecipeButton";
+import Link from 'next/link';
+import { RemoveRecipeButton } from '@/app/recipe/manage/RemoveRecipeButton';
 import { getRecipes, getRecipesByUser } from '@/app/recipe/actions';
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { getServerSession } from 'next-auth/next';
 import { UserRole } from '@/types';
 
 export default async function Page() {
+    noStore();
     const session = await getServerSession(authOptions);
-    
+
     const { rows: recipesData } =
         session?.user.role === UserRole.ADMIN
             ? await getRecipes()
             : await getRecipesByUser();
-    
+
     return (
         <>
             <div className="flex items-baseline">
@@ -33,7 +35,10 @@ export default async function Page() {
                             <article className="flex bg-[#fff]">
                                 <picture className="w-[250px]">
                                     <Image
-                                        src={`${recipe.image || 'https://placehold.co/600x400?text=Hello+world'}`}
+                                        src={`${
+                                            recipe.image ||
+                                            'https://placehold.co/600x400?text=Hello+world'
+                                        }`}
                                         alt={recipe.name}
                                         width="600"
                                         height="400"

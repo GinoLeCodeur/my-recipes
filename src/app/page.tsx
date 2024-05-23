@@ -1,9 +1,11 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { getRecipes } from './recipe/actions';
 
 export default async function Home() {
+    noStore();
     const recipesData = await getRecipes();
 
     return (
