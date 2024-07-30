@@ -29,12 +29,11 @@ export default async function Page({
                     <Image
                         src={`${
                             recipeData[0].image ||
-                            'https://placehold.co/600x400?text=Hello+world'
+                            '/my-recipes-image-placeholder.jpeg'
                         }`}
                         alt={recipeData[0].name}
                         width="600"
                         height="400"
-                        unoptimized
                         className="w-full h-[300px] object-cover"
                     />
                 </picture>

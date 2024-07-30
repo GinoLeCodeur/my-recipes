@@ -23,12 +23,11 @@ export default async function Home() {
                                         <Image
                                             src={`${
                                                 recipe.image ||
-                                                'https://placehold.co/600x400?text=Hello+world'
+                                                '/my-recipes-image-placeholder.jpeg'
                                             }`}
                                             alt={recipe.name}
                                             width="600"
                                             height="400"
-                                            unoptimized
                                             className="w-full aspect-video object-cover"
                                         />
                                     </picture>
