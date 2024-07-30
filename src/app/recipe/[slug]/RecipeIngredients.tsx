@@ -63,7 +63,7 @@ export const RecipeIngredients = ({
                     <ol>
                         {recipeIngredientsData.map((ingredient) => (
                             <li key={ingredient.ingredientId}>
-                                {calcIngredientQty(ingredient)}
+                                {calcIngredientQty(ingredient).toLocaleString('nl-NL')}
                                 {` ${ingredient.unit?.toLowerCase()}`}
                                 {` ${ingredient.name?.toLowerCase()}`}
                             </li>
