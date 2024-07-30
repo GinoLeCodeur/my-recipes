@@ -49,13 +49,17 @@ export default async function Page({
                             <p>{recipeData[0].description}</p>
                         )}
                     <h3 className="mt-4 font-bold">Stappen:</h3>
-                    {recipeStepsData.length ? (
-                        recipeStepsData.map((step) => (
-                            <p key={step.recipeStepId}>{step.description}</p>
-                        ))
-                    ) : (
-                        <p>Geen stappen gevonden</p>
-                    )}
+                    <div className="flex flex-col gap-2">
+                        {recipeStepsData.length ? (
+                            recipeStepsData.map((step) => (
+                                <p key={step.recipeStepId}>
+                                    {step.description}
+                                </p>
+                            ))
+                        ) : (
+                            <p>Geen stappen gevonden</p>
+                        )}
+                    </div>
                 </main>
                 <aside className="sticky top-[0] w-[300px]">
                     <RecipeIngredients
