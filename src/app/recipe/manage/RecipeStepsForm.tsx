@@ -1,6 +1,6 @@
 'use client';
 
-import { RecipeStep } from '@/types';
+import { Recipe, RecipeStep } from '@/types';
 import { ChangeEvent, useEffect, useState } from 'react';
 
 export const RecipeStepsForm = ({
@@ -13,7 +13,8 @@ export const RecipeStepsForm = ({
     const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([
         {
             recipeStepId: 0,
-            description: ''
+            description: '',
+            order: 0
         },
     ]);
 
@@ -39,7 +40,8 @@ export const RecipeStepsForm = ({
     const addRecipeStep = () => {
         const newRecipeStep: RecipeStep = {
             recipeStepId: 0,
-            description: ''
+            description: '',
+            order: recipeSteps.length
         };
         const newRecipeSteps = [...recipeSteps, newRecipeStep];
 
@@ -51,13 +53,64 @@ export const RecipeStepsForm = ({
             setRecipeSteps([
                 {
                     recipeStepId: 0,
-                    description: ''
+                    description: '',
+                    order: 0
                 }
             ]);
             return;
         }
         const newRecipeSteps = recipeSteps;
         newRecipeSteps.splice(rowIndex, 1);
+
+        setRecipeSteps([...newRecipeSteps]);
+    };
+
+    const reorderStep = (step: RecipeStep, position: 'up' | 'down') => {
+        if (
+            (step.order === 0 && position === 'up') ||
+            (step.order === (recipeSteps.length - 1) && position === 'down')
+        ) {
+            alert('Recept stap kan niet verplaatst worden!');
+            return;
+        }
+        
+        const newRecipeSteps = [...recipeSteps];
+
+        switch (position) {
+            case 'up': 
+                newRecipeSteps.map((originalStep) => {
+                    switch (originalStep.order) {
+                        case step.order:
+                            return {
+                                ...originalStep,
+                                order: originalStep.order--
+                            }
+                        case step.order - 1:
+                            return {
+                                ...originalStep,
+                                order: originalStep.order++,
+                            };
+                    }
+                }); 
+                break;
+            case 'down':
+                newRecipeSteps.reverse().map((originalStep) => {
+                    switch (originalStep.order) {
+                        case step.order:
+                            return {
+                                ...originalStep,
+                                order: originalStep.order++,
+                            };
+                        case step.order + 1:
+                            return {
+                                ...originalStep,
+                                order: originalStep.order--,
+                            };
+                    }
+                }); 
+                break;
+        }
+        newRecipeSteps.sort((a, b) => a.order - b.order);
 
         setRecipeSteps([...newRecipeSteps]);
     };
@@ -78,24 +131,48 @@ export const RecipeStepsForm = ({
                 Stappen
             </h4>
             {recipeSteps?.map((step, index) => (
-                <div key={index} className="relative flex items-center mb-2">
+                <div key={index} className="relative flex items-stretch mb-2">
                     <textarea
                         name={`description_${index}`}
                         value={step.description}
-                        className="block w-full h-[200px] mr-[4px] p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] resize-none"
+                        className="block w-full mr-[4px] p-2 bg-white autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] resize-none fs-content"
                         onChange={handleChange(index)}
                         aria-labelledby="recipe_steps"
                     />
-                    <button
-                        type="button"
-                        className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
-                        onClick={() => removeRecipeStep(index)}
-                        title="Stap verwijderen"
-                    >
-                        <span className="block material-symbols-outlined -mb-[2px] text-white">
-                            delete
-                        </span>
-                    </button>
+                    <div className="flex flex-col justify-center gap-1">
+                        <button
+                            type="button"
+                            className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9] disabled:bg-[#ece6e0]"
+                            onClick={() => reorderStep(step, 'up')}
+                            title="Verplaats omhoog"
+                            disabled={step.order === 0}
+                        >
+                            <span className="block material-symbols-outlined -mb-[2px] text-white">
+                                arrow_upward
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9]"
+                            onClick={() => removeRecipeStep(index)}
+                            title="Stap verwijderen"
+                        >
+                            <span className="block material-symbols-outlined -mb-[2px] text-white">
+                                delete
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            className="flex items-center justify-center w-[40px] h-[40px] bg-[#d7b4b9] disabled:bg-[#ece6e0]"
+                            onClick={() => reorderStep(step, 'down')}
+                            title="Verplaats omlaag"
+                            disabled={step.order === (recipeSteps.length - 1)}
+                        >
+                            <span className="block material-symbols-outlined -mb-[2px] text-white">
+                                arrow_downward
+                            </span>
+                        </button>
+                    </div>
                 </div>
             ))}
             <div>

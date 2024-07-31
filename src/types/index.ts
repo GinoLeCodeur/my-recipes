@@ -11,7 +11,7 @@ export type Recipe = {
 export type RecipeStep = {
     recipeStepId: number;
     description: string;
-    order?: number;
+    order: number;
 };
 
 export type Ingredient = {
