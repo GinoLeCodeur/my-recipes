@@ -29,7 +29,7 @@ export default async function Page({
                     <Image
                         src={`${
                             recipeData[0].image ||
-                            '/my-recipes-image-placeholder.jpeg'
+                            '/my-recipes-image-placeholder.jpg'
                         }`}
                         alt={recipeData[0].name}
                         width="600"

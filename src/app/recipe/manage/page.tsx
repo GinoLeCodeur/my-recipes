@@ -37,7 +37,7 @@ export default async function Page() {
                                     <Image
                                         src={`${
                                             recipe.image ||
-                                            '/my-recipes-image-placeholder.jpeg'
+                                            '/my-recipes-image-placeholder.jpg'
                                         }`}
                                         alt={recipe.name}
                                         width="600"
