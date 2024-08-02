@@ -451,7 +451,8 @@ export async function getRecipeSteps(recipeId: number) {
         return await sql<RecipeStep>`
             SELECT 
                 recipe_step_id AS "recipeStepId",
-                description
+                description,
+                step_order AS "order"
             FROM 
                 recipe_steps
             WHERE recipe_id = ${recipeId}
