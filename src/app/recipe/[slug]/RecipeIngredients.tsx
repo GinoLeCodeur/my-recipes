@@ -34,7 +34,7 @@ export const RecipeIngredients = ({
     return (
         <>
             <h4 className="font-bold">Ingrediënten</h4>
-            {recipeIngredientsData.length ? (
+            {recipeIngredientsData.length > 0 ? (
                 <>
                     <div className="flex my-2">
                         <button
